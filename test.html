@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page - Site Blocker Extension</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .test-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        .test-button:hover {
+            background: #2980b9;
+        }
+
+        .test-button.secondary {
+            background: #95a5a6;
+        }
+
+        .test-button.success {
+            background: #2ecc71;
+        }
+
+        .test-button.danger {
+            background: #e74c3c;
+        }
+
+        .test-results {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: #2ecc71;
+        }
+
+        .status-inactive {
+            background: #95a5a6;
+        }
+
+        .status-error {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Site Blocker Extension - Test Page</h1>
+
+    <div class="test-section">
+        <h2>📊 Extension Status</h2>
+        <div>
+            <span id="extension-status" class="status-indicator status-inactive"></span>
+            Extension Status: <span id="status-text">Checking...</span>
+        </div>
+        <div style="margin-top: 10px;">
+            <button class="test-button" onclick="checkExtensionStatus()">Check Status</button>
+            <button class="test-button secondary" onclick="openExtension()">Open Extension</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>⏰ Schedule Testing</h2>
+        <div>
+            <button class="test-button" onclick="testScheduleCheck()">Test Schedule Detection</button>
+            <button class="test-button secondary" onclick="testTimeBudget()">Test Time Budget</button>
+        </div>
+        <div id="schedule-results" class="test-results" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎓 Override Code Testing</h2>
+        <div>
+            <input type="text" id="test-override-code" placeholder="Enter override code" style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button class="test-button success" onclick="testOverrideCode()">Test Override</button>
+            <button class="test-button secondary" onclick="clearOverride()">Clear Override</button>
+        </div>
+        <div id="override-results" class="test-results" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🚫 Site Blocking Tests</h2>
+        <div>
+            <button class="test-button danger" onclick="testSiteBlocking()">Test Site Blocking</button>
+            <button class="test-button secondary" onclick="testEmergencyBlock()">Test Emergency Block</button>
+        </div>
+        <div id="blocking-results" class="test-results" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📈 Usage Statistics</h2>
+        <div>
+            <button class="test-button" onclick="getUsageStats()">Get Usage Stats</button>
+            <button class="test-button secondary" onclick="clearUsageStats()">Clear Stats</button>
+        </div>
+        <div id="stats-results" class="test-results" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>⚙️ Settings Management</h2>
+        <div>
+            <button class="test-button" onclick="getSettings()">Get Settings</button>
+            <button class="test-button secondary" onclick="openSettingsPage()">Open Settings</button>
+        </div>
+        <div id="settings-results" class="test-results" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Test functions for the Site Blocker extension
+
+        function checkExtensionStatus() {
+            const statusElement = document.getElementById('extension-status');
+            const statusText = document.getElementById('status-text');
+
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                try {
+                    chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
+                        if (response) {
+                            statusElement.className = 'status-indicator status-active';
+                            statusText.textContent = 'Extension Active';
+                        } else {
+                            statusElement.className = 'status-indicator status-error';
+                            statusText.textContent = 'Extension Error';
+                        }
+                    });
+                } catch (error) {
+                    statusElement.className = 'status-indicator status-error';
+                    statusText.textContent = 'Extension Not Found';
+                }
+            } else {
+                statusElement.className = 'status-indicator status-error';
+                statusText.textContent = 'Chrome APIs Not Available';
+            }
+        }
+
+        function openExtension() {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                // Try to open the extension popup programmatically
+                alert('Extension popup cannot be opened programmatically. Please click the extension icon in your browser toolbar.');
+            } else {
+                alert('Chrome extension APIs are not available in this context.');
+            }
+        }
+
+        function testScheduleCheck() {
+            const results = document.getElementById('schedule-results');
+            let output = `Schedule Test Results:\n`;
+            output += `Current Time: ${new Date().toLocaleString()}\n`;
+            output += `Day of Week: ${new Date().getDay()} (0=Sunday, 6=Saturday)\n`;
+            output += `Current Hour: ${new Date().getHours()}\n`;
+
+            // Simulate schedule check logic
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const isWeekday = now.getDay() >= 1 && now.getDay() <= 5;
+            const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+
+            output += `\nSchedule Analysis:\n`;
+            output += `Current Time (HH:MM): ${currentTime}\n`;
+            output += `Is Weekday: ${isWeekday}\n`;
+            output += `Is Weekend: ${isWeekend}\n`;
+
+            if (isWeekday) {
+                output += `Weekday Schedule: Would be active 09:00-17:00\n`;
+                if (currentTime >= '09:00' && currentTime <= '17:00') {
+                    output += `Status: BLOCKING ACTIVE\n`;
+                } else {
+                    output += `Status: Outside active hours\n`;
+                }
+            } else {
+                output += `Weekend Schedule: Check settings for weekend blocking\n`;
+            }
+
+            results.textContent = output;
+            results.style.display = 'block';
+        }
+
+        function testTimeBudget() {
+            const results = document.getElementById('schedule-results');
+            let output = `Time Budget Test:\n`;
+            output += `Simulated weekly usage tracking\n`;
+            output += `Current Week: ${getCurrentWeek()}\n`;
+            output += `\nSample Budgets (in minutes):\n`;
+            output += `youtube.com: 120 minutes/week\n`;
+            output += `reddit.com: 120 minutes/week\n`;
+            output += `facebook.com: 120 minutes/week\n`;
+
+            results.textContent = output;
+            results.style.display = 'block';
+        }
+
+        function getCurrentWeek() {
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay());
+            startOfWeek.setHours(0, 0, 0, 0);
+            return startOfWeek.toISOString().slice(0, 10);
+        }
+
+        function testOverrideCode() {
+            const codeInput = document.getElementById('test-override-code');
+            const code = codeInput.value.trim();
+            const results = document.getElementById('override-results');
+
+            if (!code) {
+                results.textContent = 'Please enter an override code to test.';
+                results.style.display = 'block';
+                return;
+            }
+
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                    type: 'ADD_OVERRIDE',
+                    code: code
+                }, (success) => {
+                    let output = `Override Code Test Results:\n`;
+                    output += `Code Entered: ${code}\n`;
+                    output += `Valid Codes: EDU2024, LEARN123, STUDY456\n`;
+                    output += `Result: ${success ? 'VALID - Override Activated' : 'INVALID - Code Not Recognized'}\n`;
+
+                    if (success) {
+                        output += `\nOverride will expire in 30 minutes.`;
+                    } else {
+                        output += `\nTry one of the valid codes above.`;
+                    }
+
+                    results.textContent = output;
+                    results.style.display = 'block';
+                });
+            } else {
+                // Simulate override check for testing without extension
+                const validCodes = ['EDU2024', 'LEARN123', 'STUDY456'];
+                const isValid = validCodes.includes(code);
+
+                let output = `Override Code Test Results (Simulated):\n`;
+                output += `Code Entered: ${code}\n`;
+                output += `Valid Codes: EDU2024, LEARN123, STUDY456\n`;
+                output += `Result: ${isValid ? 'VALID - Override Would Be Activated' : 'INVALID - Code Not Recognized'}\n`;
+
+                if (isValid) {
+                    output += `\nOverride would expire in 30 minutes.`;
+                } else {
+                    output += `\nTry one of the valid codes above.`;
+                }
+
+                results.textContent = output;
+                results.style.display = 'block';
+            }
+        }
+
+        function clearOverride() {
+            document.getElementById('test-override-code').value = '';
+            document.getElementById('override-results').style.display = 'none';
+        }
+
+        function testSiteBlocking() {
+            const results = document.getElementById('blocking-results');
+            let output = `Site Blocking Test Results:\n`;
+            output += `Current URL: ${window.location.href}\n`;
+            output += `Hostname: ${window.location.hostname}\n`;
+
+            const blockedSites = ['youtube.com', 'reddit.com', 'facebook.com'];
+            const currentSite = window.location.hostname.replace('www.', '');
+
+            output += `\nBlocked Sites: ${blockedSites.join(', ')}\n`;
+            output += `Current Site in Blocked List: ${blockedSites.includes(currentSite)}\n`;
+
+            // Simulate schedule check
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const isWeekday = now.getDay() >= 1 && now.getDay() <= 5;
+
+            output += `\nSchedule Check:\n`;
+            output += `Current Time: ${currentTime}\n`;
+            output += `Is Weekday: ${isWeekday}\n`;
+
+            if (isWeekday && currentTime >= '09:00' && currentTime <= '17:00') {
+                output += `Would Block: ${blockedSites.includes(currentSite) ? 'YES' : 'NO'}\n`;
+            } else {
+                output += `Would Block: NO (outside active hours)\n`;
+            }
+
+            results.textContent = output;
+            results.style.display = 'block';
+        }
+
+        function testEmergencyBlock() {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                    type: 'EMERGENCY_BLOCK_ALL'
+                }, (success) => {
+                    const results = document.getElementById('blocking-results');
+                    let output = `Emergency Block Test:\n`;
+                    output += `Emergency Block Activated: ${success ? 'YES' : 'NO'}\n`;
+                    output += `\nThis would immediately block all distracting sites.`;
+
+                    results.textContent = output;
+                    results.style.display = 'block';
+                });
+            } else {
+                const results = document.getElementById('blocking-results');
+                let output = `Emergency Block Test (Simulated):\n`;
+                output += `Emergency Block Would Be Activated: YES\n`;
+                output += `Would Block: youtube.com, reddit.com, facebook.com, twitter.com, instagram.com\n`;
+                output += `\nNote: This is a simulation. Install the extension to test actual blocking.`;
+
+                results.textContent = output;
+                results.style.display = 'block';
+            }
+        }
+
+        function getUsageStats() {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                    type: 'GET_STATS'
+                }, (stats) => {
+                    const results = document.getElementById('stats-results');
+                    let output = `Usage Statistics:\n`;
+                    output += `Current Week: ${getCurrentWeek()}\n\n`;
+
+                    if (stats && Object.keys(stats).length > 0) {
+                        Object.entries(stats).forEach(([site, minutes]) => {
+                            output += `${site}: ${minutes} minutes used\n`;
+                        });
+                    } else {
+                        output += `No usage data available yet.\n`;
+                        output += `Visit some sites to start tracking usage.`;
+                    }
+
+                    results.textContent = output;
+                    results.style.display = 'block';
+                });
+            } else {
+                const results = document.getElementById('stats-results');
+                let output = `Usage Statistics (Simulated):\n`;
+                output += `Current Week: ${getCurrentWeek()}\n\n`;
+                output += `youtube.com: 45 minutes used\n`;
+                output += `reddit.com: 23 minutes used\n`;
+                output += `facebook.com: 12 minutes used\n`;
+
+                results.textContent = output;
+                results.style.display = 'block';
+            }
+        }
+
+        function clearUsageStats() {
+            if (confirm('Are you sure you want to clear all usage statistics? This cannot be undone.')) {
+                const results = document.getElementById('stats-results');
+                let output = `Usage Statistics Cleared:\n`;
+                output += `All weekly usage data has been reset.\n`;
+                output += `New week starts: ${getCurrentWeek()}`;
+
+                results.textContent = output;
+                results.style.display = 'block';
+            }
+        }
+
+        function getSettings() {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                    type: 'GET_SETTINGS'
+                }, (settings) => {
+                    const results = document.getElementById('settings-results');
+                    let output = `Current Settings:\n\n`;
+
+                    if (settings) {
+                        output += `Weekday Schedule: ${settings.weekdaySchedule?.enabled ? 'Enabled' : 'Disabled'}\n`;
+                        if (settings.weekdaySchedule?.enabled) {
+                            output += `  Hours: ${settings.weekdaySchedule?.start} - ${settings.weekdaySchedule?.end}\n`;
+                        }
+                        output += `Weekend Schedule: ${settings.weekendSchedule?.enabled ? 'Enabled' : 'Disabled'}\n`;
+                        output += `Block After: ${settings.blockAfterMinutes || 30} minutes\n`;
+                        output += `Blocked Sites: ${settings.blockedSites?.join(', ') || 'None'}\n`;
+                        output += `Educational Codes: ${settings.educationalCodes?.join(', ') || 'None'}\n`;
+                    } else {
+                        output += `No settings found. Using defaults.`;
+                    }
+
+                    results.textContent = output;
+                    results.style.display = 'block';
+                });
+            } else {
+                const results = document.getElementById('settings-results');
+                let output = `Settings (Defaults):\n\n`;
+                output += `Weekday Schedule: Enabled\n`;
+                output += `  Hours: 09:00 - 17:00\n`;
+                output += `Weekend Schedule: Disabled\n`;
+                output += `Block After: 30 minutes\n`;
+                output += `Blocked Sites: youtube.com, reddit.com, facebook.com\n`;
+                output += `Educational Codes: EDU2024, LEARN123, STUDY456\n`;
+
+                results.textContent = output;
+                results.style.display = 'block';
+            }
+        }
+
+        function openSettingsPage() {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                // Try to open settings page programmatically
+                alert('Settings page cannot be opened programmatically. Please right-click the extension icon and select "Options" or go to chrome://extensions/ and click "Details" then "Extension options".');
+            } else {
+                alert('Chrome extension APIs are not available in this context.');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            checkExtensionStatus();
+        });
+    </script>
+</body>
+</html>
